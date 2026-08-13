@@ -1,5 +1,6 @@
-# LC-NE retrograde viral labelling analyses (Dbh-Cre;Ai65)
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+
+# LC-NE retrograde viral labelling analyses (Dbh-Cre;Ai65)
 
 Code Ocean capsule for the retrograde labelling arm of the LC-NE manuscript.
 Brains are *Dbh-Cre;Ai65* mice that received retrograde, Cre-dependent FlpO
