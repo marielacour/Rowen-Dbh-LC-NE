@@ -5,6 +5,24 @@ name: Docker
 # separate terms of service, privacy policy, and support
 # documentation.
 
+# Dockerfile (put at repo root)
+FROM python:3.11-slim
+
+WORKDIR /workspace
+COPY . /workspace
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential && \
+    python -m pip install --upgrade pip jupyterlab
+
+EXPOSE 8888
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--allow-root"]
+
+.git
+__pycache__
+*.ipynb_checkpoints
+.github
+
 on:
   schedule:
     - cron: '41 10 * * *'
@@ -20,6 +38,32 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+
+- name: Build and push Docker image
+  id: build-and-push
+  uses: docker/build-push-action@v5
+  with:
+    context: ./path/to/context    # where your app is
+    file: ./path/to/context/Dockerfile
+    push: ${{ github.event_name != 'pull_request' }}
+    tags: ${{ steps.meta.outputs.tags }}
+    labels: ${{ steps.meta.outputs.labels }}
+    cache-from: type=gha
+    cache-to: type=gha,mode=max
+
+    - name: Check for Dockerfile
+  id: check_dockerfile
+  run: |
+    if [ -f Dockerfile ]; then echo "exists=true" >> $GITHUB_OUTPUT; else echo "exists=false" >> $GITHUB_OUTPUT; fi
+
+# later:
+- name: Build and push Docker image
+  if: steps.check_dockerfile.outputs.exists == 'true'
+  uses: docker/build-push-action@v5
+  with:
+    context: .
+    file: ./Dockerfile
+    ...
 
 
 jobs:
