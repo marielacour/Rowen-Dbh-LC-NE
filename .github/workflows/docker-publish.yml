@@ -18,11 +18,6 @@ RUN apt-get update && \
 EXPOSE 8888
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--allow-root"]
 
-.git
-__pycache__
-*.ipynb_checkpoints
-.github
-
 on:
   schedule:
     - cron: '41 10 * * *'
@@ -140,3 +135,17 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+        - name: Check for Dockerfile
+  id: check_dockerfile
+  run: |
+    if [ -f Dockerfile ]; then echo "exists=true" >> $GITHUB_OUTPUT; else echo "exists=false" >> $GITHUB_OUTPUT; fi
+
+# later:
+- name: Build and push Docker image
+  if: steps.check_dockerfile.outputs.exists == 'true'
+  uses: docker/build-push-action@v5
+  with:
+    context: .
+    file: ./Dockerfile
+    ...
